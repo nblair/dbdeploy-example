@@ -1,0 +1,87 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.github.nblair</groupId>
+	<artifactId>dbdeploy-example</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+
+	<properties>
+		<db.driver>org.hsqldb.jdbcDriver</db.driver>
+		<db.url>jdbc:hsqldb:file:${project.build.directory}/db/testdb;shutdown=true</db.url>
+		<db.username>sa</db.username>
+		<db.password></db.password>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>hsqldb</groupId>
+				<artifactId>hsqldb</artifactId>
+				<version>1.8.0.7</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+	<build>
+		<resources>
+			<resource>
+				<directory>src/main/sql</directory>
+			</resource>
+		</resources>
+		<plugins>
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.7</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<configuration>
+							<target>
+								<sql driver="${db.driver}" url="${db.url}" userid="${db.username}"
+									password="${db.password}" classpathref="maven.plugin.classpath">
+									<fileset file="./createSchemaVersionTable.hsql.sql" />
+								</sql>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>hsqldb</groupId>
+						<artifactId>hsqldb</artifactId>
+						<version>1.8.0.7</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+			<!-- distribution obtained from https://dbdeploy.googlecode.com/files/dbdeploy-dist-3.0M3-distribution.zip -->
+			<plugin>
+				<groupId>com.dbdeploy</groupId>
+				<artifactId>maven-dbdeploy-plugin</artifactId>
+				<version>3.0M3</version>
+
+				<configuration>
+					<scriptdirectory>${basedir}/src/main/sql</scriptdirectory>
+					<driver>${db.driver}</driver>
+					<url>${db.url}</url>
+					<userid>${db.username}</userid>
+					<password>${db.password}</password>
+					<dbms>hsql</dbms>
+					<delimiter>;</delimiter>
+					<delimiterType>row</delimiterType>
+					<outputfile>${basedir}/target/outputfile</outputfile>
+					<undoOutputfile>${basedir}/target/undoOutputfile</undoOutputfile>
+				</configuration>
+
+				<dependencies>
+					<dependency>
+						<groupId>hsqldb</groupId>
+						<artifactId>hsqldb</artifactId>
+						<version>1.8.0.7</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+		</plugins>
+	</build>
+</project>
